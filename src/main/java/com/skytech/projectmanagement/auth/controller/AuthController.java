@@ -2,6 +2,9 @@ package com.skytech.projectmanagement.auth.controller;
 
 import com.skytech.projectmanagement.auth.dto.LoginRequest;
 import com.skytech.projectmanagement.auth.dto.LoginResponse;
+import com.skytech.projectmanagement.auth.dto.LogoutRequest;
+import com.skytech.projectmanagement.auth.dto.RefreshTokenRequest;
+import com.skytech.projectmanagement.auth.dto.RefreshTokenResponse;
 import com.skytech.projectmanagement.auth.service.AuthService;
 import com.skytech.projectmanagement.common.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,27 @@ public class AuthController {
 
         SuccessResponse<LoginResponse> response =
                 SuccessResponse.of(loginData, "Đăng nhập thành công.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<SuccessResponse<Object>> logout(
+            @Valid @RequestBody LogoutRequest logoutRequest) {
+        authService.logout(logoutRequest.refreshToken());
+
+        SuccessResponse<Object> response = SuccessResponse.of(null, "Đăng xuất thành công.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<SuccessResponse<RefreshTokenResponse>> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        RefreshTokenResponse responseData = authService.refreshToken(request);
+
+        SuccessResponse<RefreshTokenResponse> response =
+                SuccessResponse.of(responseData, "Làm mới token thành công.");
 
         return ResponseEntity.ok(response);
     }
