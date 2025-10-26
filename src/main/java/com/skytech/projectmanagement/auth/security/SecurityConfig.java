@@ -34,6 +34,8 @@ public class SecurityConfig {
                         authorize -> authorize.requestMatchers("/auth-service/v1/login").permitAll()
                                 .requestMatchers("/auth-service/v1/logout").permitAll()
                                 .requestMatchers("/auth-service/v1/refresh").permitAll()
+                                .requestMatchers("/auth-service/v1/forgot-password").permitAll()
+                                .requestMatchers("/auth-service/v1/reset-password").permitAll()
                                 .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

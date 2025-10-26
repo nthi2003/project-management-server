@@ -15,6 +15,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResetTokenException(
+            InvalidResetTokenException ex) {
+
+        ErrorDetails errorDetails = new ErrorDetails("INVALID_RESET_TOKEN", // 400
+                ex.getMessage(), null);
+
+        ErrorResponse errorResponse =
+                ErrorResponse.of("Token không hợp lệ hoặc đã hết hạn.", errorDetails);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
+    }
+
     @ExceptionHandler(RefreshTokenException.class)
     public ResponseEntity<ErrorResponse> handleRefreshTokenException(RefreshTokenException ex) {
 

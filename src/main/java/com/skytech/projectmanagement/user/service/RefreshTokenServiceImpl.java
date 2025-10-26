@@ -5,7 +5,7 @@ import com.skytech.projectmanagement.common.exception.InvalidTokenException;
 import com.skytech.projectmanagement.user.entity.UserRefreshToken;
 import com.skytech.projectmanagement.user.repository.UserRefreshTokenRepository;
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
