@@ -15,6 +15,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(InvalidOldPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOldPasswordException(
+            InvalidOldPasswordException ex) {
+
+        ErrorDetails errorDetails = new ErrorDetails("INVALID_OLD_PASSWORD", // 400
+                ex.getMessage(), null);
+
+        ErrorResponse errorResponse =
+                ErrorResponse.of("Mật khẩu cũ không chính xác.", errorDetails);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
+    }
+
     @ExceptionHandler(InvalidResetTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidResetTokenException(
             InvalidResetTokenException ex) {

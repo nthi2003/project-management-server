@@ -1,5 +1,6 @@
 package com.skytech.projectmanagement.user.service;
 
+import com.skytech.projectmanagement.user.dto.ChangePasswordRequest;
 import com.skytech.projectmanagement.user.entity.User;
 
 public interface UserService {
@@ -9,4 +10,6 @@ public interface UserService {
     User findUserById(Integer id);
 
     void updatePassword(Integer userId, String newPassword);
+
+    void changePassword(String userEmail, ChangePasswordRequest request);
 }
