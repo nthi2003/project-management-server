@@ -2,8 +2,8 @@ spring:
   application:
     name: projectmanagement
   datasource:
-    url: jdbc:mysql://localhost:3306/project_management?createDatabaseIfNotExist=true
-    username: root
+    url: jdbc:postgresql://localhost:5432/project_management
+    username: postgres
     password: 12345
   jpa:
     hibernate:
