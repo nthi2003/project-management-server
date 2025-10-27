@@ -15,6 +15,49 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ProjectKeyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProjectKeyExistsException(
+            ProjectKeyExistsException ex) {
+
+        ErrorDetails errorDetails = new ErrorDetails("PROJECT_KEY_EXISTS", ex.getMessage(), null);
+
+        ErrorResponse errorResponse = ErrorResponse.of("Project key đã tồn tại.", errorDetails);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409
+    }
+
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException ex) {
+        ErrorDetails errorDetails =
+                new ErrorDetails("FILE_VALIDATION_ERROR", ex.getMessage(), null);
+
+        ErrorResponse errorResponse = ErrorResponse.of("Có lỗi với File Storage", errorDetails);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(DeleteConflictException.class)
+    public ResponseEntity<ErrorResponse> handleDeleteConflictException(DeleteConflictException ex) {
+
+        ErrorDetails errorDetails = new ErrorDetails("DELETE_CONFLICT", // 409
+                ex.getMessage(), null);
+
+        ErrorResponse errorResponse = ErrorResponse.of("Không thể xóa.", errorDetails);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409
+    }
+
+    @ExceptionHandler(EmailExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailExistsException(EmailExistsException ex) {
+
+        ErrorDetails errorDetails = new ErrorDetails("EMAIL_EXISTS", // 409
+                ex.getMessage(), null);
+
+        ErrorResponse errorResponse = ErrorResponse.of("Email đã tồn tại.", errorDetails);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409
+    }
+
     @ExceptionHandler(InvalidOldPasswordException.class)
     public ResponseEntity<ErrorResponse> handleInvalidOldPasswordException(
             InvalidOldPasswordException ex) {
