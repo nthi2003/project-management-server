@@ -1,23 +1,49 @@
 package com.skytech.projectmanagement.user.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import com.skytech.projectmanagement.common.dto.PaginatedResponse;
+import com.skytech.projectmanagement.common.dto.Pagination;
+import com.skytech.projectmanagement.common.exception.DeleteConflictException;
+import com.skytech.projectmanagement.common.exception.EmailExistsException;
+import com.skytech.projectmanagement.common.exception.FileStorageException;
 import com.skytech.projectmanagement.common.exception.InvalidOldPasswordException;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
+import com.skytech.projectmanagement.filestorage.config.MinioConfig;
+import com.skytech.projectmanagement.filestorage.service.FileStorageService;
 import com.skytech.projectmanagement.user.dto.ChangePasswordRequest;
+import com.skytech.projectmanagement.user.dto.CreateUserRequest;
+import com.skytech.projectmanagement.user.dto.UpdateUserRequest;
+import com.skytech.projectmanagement.user.dto.UserResponse;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.UserRefreshTokenRepository;
 import com.skytech.projectmanagement.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
+    private final MinioConfig minioConfig;
 
     @Override
     public User findUserByEmail(String email) {
@@ -57,6 +83,186 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(currentUser);
         userRefreshTokenRepository.deleteByUserId(currentUser.getId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserProfile(String email) {
+        User user = findUserByEmail(email);
+
+        return UserResponse.fromEntity(user);
+    }
+
+    @Override
+    public PaginatedResponse<UserResponse> getUsers(Pageable pageable, String search) {
+        Specification<User> spec = (root, query, cb) -> {
+            if (!StringUtils.hasText(search)) {
+                return cb.conjunction();
+            }
+
+            Predicate nameLike =
+                    cb.like(cb.lower(root.get("fullName")), "%" + search.toLowerCase() + "%");
+            Predicate emailLike =
+                    cb.like(cb.lower(root.get("email")), "%" + search.toLowerCase() + "%");
+
+            return cb.or(nameLike, emailLike);
+        };
+
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+
+        List<UserResponse> userDtoList = userPage.stream().map(UserResponse::fromEntity).toList();
+
+        Pagination pagination = new Pagination(userPage.getNumber(), userPage.getSize(),
+                userPage.getTotalElements(), userPage.getTotalPages());
+
+        return PaginatedResponse.of(userDtoList, pagination,
+                "Lấy danh sách người dùng thành công.");
+    }
+
+    @Override
+    @Transactional
+    public UserResponse createUser(CreateUserRequest request) {
+        userRepository.findByEmail(request.email()).ifPresent(existingUser -> {
+            throw new EmailExistsException("Email '" + request.email() + "' đã được sử dụng.");
+        });
+
+        User newUser = new User();
+        newUser.setFullName(request.fullName());
+        newUser.setEmail(request.email());
+        newUser.setHashPassword(passwordEncoder.encode(request.password()));
+        newUser.setIsProductOwner(false);
+
+        User savedUser = userRepository.save(newUser);
+
+        return UserResponse.fromEntity(savedUser);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        return UserResponse.fromEntity(user);
+    }
+
+    @Override
+    public UserResponse updateUser(Integer userId, UpdateUserRequest request) {
+        User userToUpdate = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        if (request.fullName() != null) {
+            userToUpdate.setFullName(request.fullName());
+        }
+
+        if (request.isProductOwner() != null) {
+            userToUpdate.setIsProductOwner(request.isProductOwner());
+        }
+
+        User updatedUser = userRepository.save(userToUpdate);
+
+        return UserResponse.fromEntity(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Integer userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId);
+        }
+
+        User userToDelete = userRepository.findById(userId).get();
+
+        String oldAvatarUrl = userToDelete.getAvatar();
+        if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
+            try {
+                String oldObjectName = extractObjectNameFromUrl(oldAvatarUrl,
+                        minioConfig.getEndpoint(), minioConfig.getBucketName());
+                if (oldObjectName != null) {
+                    log.info("Attempting to delete old avatar: {}", oldObjectName);
+                    fileStorageService.deleteFile(oldObjectName);
+                }
+            } catch (Exception e) {
+                log.error("Could not delete old avatar '{}': {}", oldAvatarUrl, e.getMessage());
+            }
+        }
+
+        Integer adminCount = userRepository.countByIsProductOwner(true);
+
+        if (Boolean.TRUE.equals(userToDelete.getIsProductOwner()) && adminCount <= 1) {
+            throw new DeleteConflictException("Không thể xóa Product Owner cuối cùng.");
+        }
+
+        // Kiểm tra xem user có đang là thành viên của project nào không (Module Project)
+        // Xóa user khỏi team (Module Team)
+
+        userRefreshTokenRepository.deleteByUserId(userId);
+
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse uploadAvatar(String userEmail, MultipartFile file) {
+        validateAvatarFile(file);
+
+        User currentUser = findUserByEmail(userEmail);
+
+        String oldAvatarUrl = currentUser.getAvatar();
+        if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
+            try {
+                String oldObjectName = extractObjectNameFromUrl(oldAvatarUrl,
+                        minioConfig.getEndpoint(), minioConfig.getBucketName());
+                if (oldObjectName != null) {
+                    log.info("Attempting to delete old avatar: {}", oldObjectName);
+                    fileStorageService.deleteFile(oldObjectName);
+                }
+            } catch (Exception e) {
+                log.error("Could not delete old avatar '{}': {}", oldAvatarUrl, e.getMessage());
+            }
+        }
+
+        String objectName = fileStorageService.uploadFile(file, "avatars/");
+        String avatarUrl = fileStorageService.getFileUrl(objectName);
+
+        currentUser.setAvatar(avatarUrl);
+        User updatedUser = userRepository.save(currentUser);
+
+        return UserResponse.fromEntity(updatedUser);
+    }
+
+    private void validateAvatarFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new FileStorageException("File avatar không được để trống.");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || (!contentType.startsWith("image/jpeg")
+                && !contentType.startsWith("image/png"))) {
+            throw new FileStorageException("Chỉ chấp nhận file ảnh JPG hoặc PNG.");
+        }
+    }
+
+    private String extractObjectNameFromUrl(String fileUrl, String endpoint, String bucketName) {
+        if (fileUrl == null || endpoint == null || bucketName == null)
+            return null;
+
+        String prefixToRemove = endpoint + "/" + bucketName + "/";
+
+        if (fileUrl.startsWith(prefixToRemove)) {
+            return fileUrl.substring(prefixToRemove.length());
+        } else {
+            log.warn("Could not extract object name from URL: {}", fileUrl);
+            return null;
+        }
+    }
+
+    @Override
+    public Map<Integer, User> findUsersMapByIds(Set<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<User> users = userRepository.findByIdIn(userIds);
+        return users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
     }
 
 }
