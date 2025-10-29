@@ -1,14 +1,26 @@
 package com.skytech.projectmanagement.project.service;
 
+import java.util.List;
 import com.skytech.projectmanagement.common.dto.PaginatedResponse;
+import com.skytech.projectmanagement.project.dto.AddMemberRequest;
 import com.skytech.projectmanagement.project.dto.CreateProjectRequest;
 import com.skytech.projectmanagement.project.dto.ProjectDetailsResponse;
+import com.skytech.projectmanagement.project.dto.ProjectMemberResponse;
 import com.skytech.projectmanagement.project.dto.ProjectSummaryResponse;
+import com.skytech.projectmanagement.project.dto.UpdateMemberRoleRequest;
 import com.skytech.projectmanagement.project.dto.UpdateProjectRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 public interface ProjectService {
+
+    void removeProjectMember(Integer projectId, Integer userId, Authentication auth);
+
+    ProjectMemberResponse updateMemberRole(Integer projectId, Integer userId,
+            UpdateMemberRoleRequest request, Authentication auth);
+
+    List<ProjectMemberResponse> addProjectMembers(Integer projectId,
+            List<AddMemberRequest> requests, Authentication auth);
 
     ProjectSummaryResponse updateProject(Integer projectId, UpdateProjectRequest request,
             Authentication authentication);
@@ -22,4 +34,6 @@ public interface ProjectService {
 
     PaginatedResponse<ProjectSummaryResponse> getProjects(Pageable pageable, String search,
             Authentication authentication);
+
+    List<ProjectMemberResponse> getProjectMembers(Integer projectId, Authentication authentication);
 }

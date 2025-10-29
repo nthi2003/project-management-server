@@ -13,6 +13,7 @@ import com.skytech.projectmanagement.common.exception.EmailExistsException;
 import com.skytech.projectmanagement.common.exception.FileStorageException;
 import com.skytech.projectmanagement.common.exception.InvalidOldPasswordException;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
+import com.skytech.projectmanagement.common.exception.UserNotFoundInRequestException;
 import com.skytech.projectmanagement.filestorage.config.MinioConfig;
 import com.skytech.projectmanagement.filestorage.service.FileStorageService;
 import com.skytech.projectmanagement.user.dto.ChangePasswordRequest;
@@ -263,6 +264,21 @@ public class UserServiceImpl implements UserService {
         }
         List<User> users = userRepository.findByIdIn(userIds);
         return users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+    }
+
+    @Override
+    @Transactional
+    public void validateUsersExist(Set<Integer> userIds) {
+        long foundCount = userRepository.countByIdIn(userIds);
+        if (foundCount != userIds.size()) {
+            List<User> foundUsers = userRepository.findByIdIn(userIds);
+            Set<Integer> foundIds =
+                    foundUsers.stream().map(User::getId).collect(Collectors.toSet());
+            Set<Integer> missingIds = new java.util.HashSet<>(userIds);
+            missingIds.removeAll(foundIds);
+
+            throw new UserNotFoundInRequestException("Các User ID không tồn tại: " + missingIds);
+        }
     }
 
 }

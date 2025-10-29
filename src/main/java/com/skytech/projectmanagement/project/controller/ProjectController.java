@@ -1,10 +1,14 @@
 package com.skytech.projectmanagement.project.controller;
 
+import java.util.List;
 import com.skytech.projectmanagement.common.dto.PaginatedResponse;
 import com.skytech.projectmanagement.common.dto.SuccessResponse;
+import com.skytech.projectmanagement.project.dto.AddMemberRequest;
 import com.skytech.projectmanagement.project.dto.CreateProjectRequest;
 import com.skytech.projectmanagement.project.dto.ProjectDetailsResponse;
+import com.skytech.projectmanagement.project.dto.ProjectMemberResponse;
 import com.skytech.projectmanagement.project.dto.ProjectSummaryResponse;
+import com.skytech.projectmanagement.project.dto.UpdateMemberRoleRequest;
 import com.skytech.projectmanagement.project.dto.UpdateProjectRequest;
 import com.skytech.projectmanagement.project.service.ProjectService;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +37,65 @@ import lombok.RequiredArgsConstructor;
 public class ProjectController {
 
     private final ProjectService projectService;
+
+    @DeleteMapping("/{projectId}/members/{userId}")
+    public ResponseEntity<SuccessResponse<Object>> removeProjectMember(
+            @PathVariable Integer projectId, @PathVariable Integer userId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        projectService.removeProjectMember(projectId, userId, authentication);
+
+        SuccessResponse<Object> response = SuccessResponse.of(null, "Xóa thành viên thành công.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{projectId}/members/{userId}")
+    public ResponseEntity<SuccessResponse<ProjectMemberResponse>> updateMemberRole(
+            @PathVariable Integer projectId, @PathVariable Integer userId,
+            @Valid @RequestBody UpdateMemberRoleRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        ProjectMemberResponse updatedMember =
+                projectService.updateMemberRole(projectId, userId, request, authentication);
+
+        SuccessResponse<ProjectMemberResponse> response =
+                SuccessResponse.of(updatedMember, "Cập nhật vai trò thành công.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{projectId}/members")
+    public ResponseEntity<SuccessResponse<List<ProjectMemberResponse>>> addProjectMembers(
+            @PathVariable Integer projectId, @Valid @RequestBody List<AddMemberRequest> requests) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        List<ProjectMemberResponse> newMembers =
+                projectService.addProjectMembers(projectId, requests, authentication);
+
+        SuccessResponse<List<ProjectMemberResponse>> response = SuccessResponse.of(newMembers,
+                "Thêm " + newMembers.size() + " thành viên thành công.");
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{projectId}/members")
+    public ResponseEntity<SuccessResponse<List<ProjectMemberResponse>>> getProjectMembers(
+            @PathVariable Integer projectId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        List<ProjectMemberResponse> members =
+                projectService.getProjectMembers(projectId, authentication);
+
+        SuccessResponse<List<ProjectMemberResponse>> response =
+                SuccessResponse.of(members, "Lấy danh sách thành viên thành công.");
+
+        return ResponseEntity.ok(response);
+    }
 
     @PatchMapping("/{projectId}")
     public ResponseEntity<SuccessResponse<ProjectSummaryResponse>> updateProject(
