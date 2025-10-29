@@ -15,6 +15,32 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMemberNotFound(MemberNotFoundException ex) {
+        ErrorDetails details = new ErrorDetails("MEMBER_NOT_FOUND", // 404
+                ex.getMessage(), null);
+        return new ResponseEntity<>(ErrorResponse.of(ex.getMessage(), details),
+                HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundInRequestException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundInRequest(
+            UserNotFoundInRequestException ex) {
+        ErrorDetails details = new ErrorDetails("USER_NOT_FOUND", // 400
+                ex.getMessage(), null);
+        return new ResponseEntity<>(ErrorResponse.of("Dữ liệu không hợp lệ.", details),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MemberAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleMemberAlreadyExists(
+            MemberAlreadyExistsException ex) {
+        ErrorDetails details = new ErrorDetails("MEMBER_ALREADY_EXISTS", // 409
+                ex.getMessage(), null);
+        return new ResponseEntity<>(ErrorResponse.of("Thành viên đã tồn tại.", details),
+                HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ProjectKeyExistsException.class)
     public ResponseEntity<ErrorResponse> handleProjectKeyExistsException(
             ProjectKeyExistsException ex) {

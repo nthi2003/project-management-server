@@ -3,8 +3,9 @@ package com.skytech.projectmanagement.common.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.CONFLICT) // 409
-public class EmailExistsException extends RuntimeException {
-    public EmailExistsException(String message) {
+@ResponseStatus(HttpStatus.BAD_REQUEST) // 400
+public class UserNotFoundInRequestException extends RuntimeException {
+    public UserNotFoundInRequestException(String message) {
         super(message);
-    }}
+    }
+}

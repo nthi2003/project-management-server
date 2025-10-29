@@ -15,4 +15,6 @@ public interface UserRepository
     Integer countByIsProductOwner(boolean isProductOwner);
 
     List<User> findByIdIn(Collection<Integer> userIds);
+
+    long countByIdIn(Collection<Integer> userIds);
 }
