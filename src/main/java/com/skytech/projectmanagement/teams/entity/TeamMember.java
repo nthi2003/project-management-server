@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.team_member.entity;
+package com.skytech.projectmanagement.teams.entity;
 
 import com.skytech.projectmanagement.teams.entity.Teams;
 import com.skytech.projectmanagement.user.entity.User;
@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "team_members")
@@ -17,11 +19,10 @@ public class TeamMember {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = false)
-    private Teams team;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "team_id", nullable = false)
+    private UUID teamId;
+
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 }

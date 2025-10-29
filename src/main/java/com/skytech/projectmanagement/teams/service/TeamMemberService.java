@@ -1,7 +1,7 @@
-package com.skytech.projectmanagement.team_member.service;
+package com.skytech.projectmanagement.teams.service;
 
-import com.skytech.projectmanagement.team_member.dto.TeamMemberDTO;
-import com.skytech.projectmanagement.team_member.entity.TeamMember;
+import com.skytech.projectmanagement.teams.dto.TeamMemberDTO;
+import com.skytech.projectmanagement.teams.entity.TeamMember;
 
 import java.util.List;
 import java.util.UUID;

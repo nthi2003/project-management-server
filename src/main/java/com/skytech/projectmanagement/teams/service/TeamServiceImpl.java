@@ -6,7 +6,7 @@ import com.skytech.projectmanagement.teams.dto.TeamsDTO;
 import com.skytech.projectmanagement.teams.entity.Teams;
 import com.skytech.projectmanagement.teams.mapper.TeamMapper;
 import com.skytech.projectmanagement.teams.repository.TeamsRepository;
-import com.skytech.projectmanagement.team_member.repository.TeamMemberRepository;
+import com.skytech.projectmanagement.teams.repository.TeamMemberRepository;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.UserRepository;
 import com.skytech.projectmanagement.filestorage.service.FileStorageService;
@@ -43,9 +43,7 @@ public class TeamServiceImpl implements TeamsService {
     @Override
     public TeamsDTO createTeam(TeamsDTO dto) {
         Teams team = teamMapper.toEntity(dto);
-        if (team.getId() == null) {
-            team.setId(UUID.randomUUID());
-        }
+
         Teams savedTeam = teamsRepository.save(team);
         return teamMapper.toDto(savedTeam);
     }
@@ -78,8 +76,8 @@ public class TeamServiceImpl implements TeamsService {
         Teams team = teamsRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy team với ID: " + teamId));
 
-        if (!checkUserInTeam(teamId, user.getId())) {
-            throw new RuntimeException("Bạn không phải là thành viên của team này."); // sẽ được GlobalExceptionHandler xử lý
+        if (!user.getIsProductOwner() && !checkUserInTeam(teamId, user.getId())) {
+            throw new RuntimeException("Bạn không có quyền cập nhật ảnh team này.");
         }
 
         if (file.isEmpty() || file.getSize() > 5 * 1024 * 1024 ||

@@ -50,7 +50,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Integer userId) {
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+        return UserResponse.fromEntity(user);
     }
 
     @Override

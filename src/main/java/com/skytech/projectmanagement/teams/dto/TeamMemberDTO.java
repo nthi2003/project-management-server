@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.team_member.dto;
+package com.skytech.projectmanagement.teams.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
