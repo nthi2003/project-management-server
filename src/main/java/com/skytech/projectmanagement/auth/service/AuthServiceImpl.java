@@ -1,5 +1,7 @@
 package com.skytech.projectmanagement.auth.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import com.skytech.projectmanagement.auth.dto.LoginRequest;
 import com.skytech.projectmanagement.auth.dto.LoginResponse;
 import com.skytech.projectmanagement.auth.dto.RefreshTokenRequest;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,8 +70,11 @@ public class AuthServiceImpl implements AuthService {
                 jwtTokenProvider.getExpirationDateFromToken(refreshToken).toInstant(),
                 loginRequest.deviceInfo());
 
+        List<String> permissions = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+
         UserLoginResponse userResponse = new UserLoginResponse(user.getId(), user.getFullName(),
-                user.getEmail(), user.getAvatar(), user.getIsProductOwner());
+                user.getEmail(), user.getAvatar(), permissions);
 
         return new LoginResponse(userResponse, accessToken, refreshToken, jwtExpirationMs / 1000);
     }
