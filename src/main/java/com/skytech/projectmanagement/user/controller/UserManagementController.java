@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,7 +31,6 @@ public class UserManagementController {
     private final UserService userService;
 
     @DeleteMapping("/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<SuccessResponse<Object>> deleteUser(@PathVariable Integer userId) {
         userService.deleteUser(userId);
 
@@ -42,7 +40,6 @@ public class UserManagementController {
     }
 
     @GetMapping("/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<SuccessResponse<UserResponse>> getUserById(@PathVariable Integer userId) {
         UserResponse userDto = userService.getUserById(userId);
 
@@ -53,7 +50,6 @@ public class UserManagementController {
     }
 
     @PatchMapping("/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<SuccessResponse<UserResponse>> updateUser(@PathVariable Integer userId,
             @Valid @RequestBody UpdateUserRequest request) {
 
@@ -66,7 +62,6 @@ public class UserManagementController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<SuccessResponse<UserResponse>> createUser(
             @Valid @RequestBody CreateUserRequest request) {
 
@@ -79,7 +74,6 @@ public class UserManagementController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,

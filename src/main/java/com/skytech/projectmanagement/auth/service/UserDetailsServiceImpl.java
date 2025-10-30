@@ -34,7 +34,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email);
         }
 
-        Set<String> permissions = permissionRepository.findAllPermissionsByUserId(user.getId());
+        Set<String> permissions;
+
+        if (Boolean.TRUE.equals(user.getIsAdmin())) {
+            permissions = permissionRepository.findAllPermissionNames();
+        } else {
+            permissions = permissionRepository.findHybridPermissionsByUserId(user.getId());
+        }
 
         List<GrantedAuthority> authorities =
                 permissions.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());

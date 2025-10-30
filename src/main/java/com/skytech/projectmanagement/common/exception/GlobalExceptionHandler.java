@@ -15,6 +15,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
+        ErrorDetails errorDetails = new ErrorDetails("VALIDATION_ERROR", ex.getMessage(), null);
+        ErrorResponse errorResponse = ErrorResponse.of("Dữ liệu không hợp lệ.", errorDetails);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST); // 400
+    }
+
     @ExceptionHandler(MemberNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleMemberNotFound(MemberNotFoundException ex) {
         ErrorDetails details = new ErrorDetails("MEMBER_NOT_FOUND", // 404

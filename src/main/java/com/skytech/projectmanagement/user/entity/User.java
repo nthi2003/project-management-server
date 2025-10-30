@@ -39,6 +39,9 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
+    @Column(name = "is_admin")
+    private Boolean isAdmin;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
