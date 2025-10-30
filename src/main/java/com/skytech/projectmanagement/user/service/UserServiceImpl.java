@@ -8,7 +8,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.skytech.projectmanagement.common.dto.PaginatedResponse;
 import com.skytech.projectmanagement.common.dto.Pagination;
-import com.skytech.projectmanagement.common.exception.DeleteConflictException;
 import com.skytech.projectmanagement.common.exception.EmailExistsException;
 import com.skytech.projectmanagement.common.exception.FileStorageException;
 import com.skytech.projectmanagement.common.exception.InvalidOldPasswordException;
@@ -131,7 +130,6 @@ public class UserServiceImpl implements UserService {
         newUser.setFullName(request.fullName());
         newUser.setEmail(request.email());
         newUser.setHashPassword(passwordEncoder.encode(request.password()));
-        newUser.setIsProductOwner(false);
 
         User savedUser = userRepository.save(newUser);
 
@@ -154,10 +152,6 @@ public class UserServiceImpl implements UserService {
 
         if (request.fullName() != null) {
             userToUpdate.setFullName(request.fullName());
-        }
-
-        if (request.isProductOwner() != null) {
-            userToUpdate.setIsProductOwner(request.isProductOwner());
         }
 
         User updatedUser = userRepository.save(userToUpdate);
@@ -188,14 +182,9 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        Integer adminCount = userRepository.countByIsProductOwner(true);
-
-        if (Boolean.TRUE.equals(userToDelete.getIsProductOwner()) && adminCount <= 1) {
-            throw new DeleteConflictException("Không thể xóa Product Owner cuối cùng.");
-        }
-
         // Kiểm tra xem user có đang là thành viên của project nào không (Module Project)
         // Xóa user khỏi team (Module Team)
+        // Xóa user khỏi role_permission
 
         userRefreshTokenRepository.deleteByUserId(userId);
 
@@ -279,6 +268,14 @@ public class UserServiceImpl implements UserService {
 
             throw new UserNotFoundInRequestException("Các User ID không tồn tại: " + missingIds);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User findUserByEmailForAuth(String email) {
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Email không tồn tại: " + email));
     }
 
 }

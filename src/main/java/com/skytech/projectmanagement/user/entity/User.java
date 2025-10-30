@@ -36,9 +36,6 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "is_product_owner")
-    private Boolean isProductOwner;
-
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 

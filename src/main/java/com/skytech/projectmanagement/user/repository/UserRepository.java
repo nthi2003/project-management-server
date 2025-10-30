@@ -12,8 +12,6 @@ public interface UserRepository
 
     Optional<User> findByEmail(String email);
 
-    Integer countByIsProductOwner(boolean isProductOwner);
-
     List<User> findByIdIn(Collection<Integer> userIds);
 
     long countByIdIn(Collection<Integer> userIds);
