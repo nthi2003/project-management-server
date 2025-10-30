@@ -1,3 +1,4 @@
+
 package com.skytech.projectmanagement.common.exception;
 
 import org.springframework.http.HttpStatus;
@@ -9,3 +10,4 @@ public class ProjectKeyExistsException extends RuntimeException {
         super(message);
     }
 }
+
