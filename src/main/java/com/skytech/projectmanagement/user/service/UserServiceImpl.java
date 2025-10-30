@@ -270,4 +270,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsById(Integer userId) {
+        return userRepository.existsById(userId);
+    }
+
 }

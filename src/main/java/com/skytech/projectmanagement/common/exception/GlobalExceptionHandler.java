@@ -15,6 +15,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(RoleNameExistsException.class)
+    public ResponseEntity<ErrorResponse> handleRoleNameExists(RoleNameExistsException ex) {
+        ErrorDetails details = new ErrorDetails("ROLE_NAME_EXISTS", // 409
+                ex.getMessage(), null);
+        ErrorResponse errorResponse = ErrorResponse.of("Tên vai trò đã tồn tại.", details);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409
+    }
+
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
         ErrorDetails errorDetails = new ErrorDetails("VALIDATION_ERROR", ex.getMessage(), null);

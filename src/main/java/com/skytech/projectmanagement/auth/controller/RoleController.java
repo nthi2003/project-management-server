@@ -1,15 +1,18 @@
 package com.skytech.projectmanagement.auth.controller;
 
 import java.util.List;
+import com.skytech.projectmanagement.auth.dto.CreateRoleRequest;
 import com.skytech.projectmanagement.auth.dto.PermissionResponse;
 import com.skytech.projectmanagement.auth.dto.RoleResponse;
 import com.skytech.projectmanagement.auth.dto.SyncRolePermissionsRequest;
 import com.skytech.projectmanagement.auth.service.RoleService;
 import com.skytech.projectmanagement.common.dto.SuccessResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,5 +64,18 @@ public class RoleController {
                 SuccessResponse.of(updatedPermissions, "Cập nhật quyền cho vai trò thành công.");
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
+    public ResponseEntity<SuccessResponse<RoleResponse>> createRole(
+            @Valid @RequestBody CreateRoleRequest request) {
+
+        RoleResponse newRole = roleService.createRole(request);
+
+        SuccessResponse<RoleResponse> response =
+                SuccessResponse.of(newRole, "Tạo vai trò thành công.");
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

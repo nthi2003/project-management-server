@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
+    boolean existsById(Integer userId);
+
     void validateUsersExist(Set<Integer> userIds);
 
     Map<Integer, User> findUsersMapByIds(Set<Integer> userIds);
