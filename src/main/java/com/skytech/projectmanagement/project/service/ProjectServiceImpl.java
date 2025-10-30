@@ -308,7 +308,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         projectMemberRepository.deleteById(memberId);
-        throw new UnsupportedOperationException("Unimplemented method 'removeProjectMember'");
     }
 
     private void checkAdminOrCreatorPermission(Project project, User currentUser,
