@@ -36,11 +36,12 @@ public class TeamsController {
     @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<PaginatedResponse<TeamsDTO>> getAllTeams(Pageable pageable) {
         Page<TeamsDTO> page = teamsService.getAllTeams(pageable);
-        Pagination pagination = new Pagination(page.getNumber(), page.getSize(),
-                page.getTotalElements(), page.getTotalPages());
-        return ResponseEntity.ok(PaginatedResponse.of(page.getContent(), pagination,
-                "Lấy danh sách team thành công"));
+        Pagination pagination = new Pagination(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        return ResponseEntity.ok(
+                PaginatedResponse.of(page.getContent(), pagination, "Lấy danh sách team thành công.")
+        );
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<TeamsDTO>> getTeamById(@PathVariable UUID id) {
