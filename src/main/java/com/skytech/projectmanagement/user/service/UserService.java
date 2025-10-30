@@ -13,8 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
-    User findUserByEmailForAuth(String email);
-
     void validateUsersExist(Set<Integer> userIds);
 
     Map<Integer, User> findUsersMapByIds(Set<Integer> userIds);

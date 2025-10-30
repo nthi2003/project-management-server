@@ -1,21 +1,19 @@
 package com.skytech.projectmanagement.teams.service;
 
-import com.skytech.projectmanagement.common.exception.DeleteConflictException;
-import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
-
-import com.skytech.projectmanagement.teams.dto.TeamMemberDTO;
-import com.skytech.projectmanagement.teams.entity.TeamMember;
-import com.skytech.projectmanagement.teams.mapper.TeamMemberMapper;
-import com.skytech.projectmanagement.teams.repository.TeamMemberRepository;
-import com.skytech.projectmanagement.teams.dto.TeamsDTO;
-import com.skytech.projectmanagement.user.dto.UserResponse;
-import com.skytech.projectmanagement.user.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.skytech.projectmanagement.common.exception.DeleteConflictException;
+import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
+import com.skytech.projectmanagement.teams.dto.TeamMemberDTO;
+import com.skytech.projectmanagement.teams.dto.TeamsDTO;
+import com.skytech.projectmanagement.teams.entity.TeamMember;
+import com.skytech.projectmanagement.teams.mapper.TeamMemberMapper;
+import com.skytech.projectmanagement.teams.repository.TeamMemberRepository;
+import com.skytech.projectmanagement.user.dto.UserResponse;
+import com.skytech.projectmanagement.user.service.UserService;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class TeamMemberServiceImpl implements TeamMemberService {
             dto.setFullName(user.fullName());
             dto.setEmail(user.email());
             dto.setAvatar(user.avatarUrl());
-            dto.setIsProductOwner(user.isProductOwner());
+            // dto.setIsProductOwner(user.isProductOwner());
 
             return dto;
         }).collect(Collectors.toList());
@@ -66,8 +64,8 @@ public class TeamMemberServiceImpl implements TeamMemberService {
 
     @Override
     public void removeMember(UUID teamId, Integer userId) {
-        TeamMember member = teamMemberRepository.findByTeamIdAndUserId(teamId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không phải thành viên của team"));
+        TeamMember member = teamMemberRepository.findByTeamIdAndUserId(teamId, userId).orElseThrow(
+                () -> new ResourceNotFoundException("Người dùng không phải thành viên của team"));
         teamMemberRepository.delete(member);
     }
 }

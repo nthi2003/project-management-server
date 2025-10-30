@@ -29,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         User user;
         try {
-            user = userService.findUserByEmailForAuth(email);
+            user = userService.findUserByEmail(email);
         } catch (ResourceNotFoundException ex) {
             throw new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email);
         }
