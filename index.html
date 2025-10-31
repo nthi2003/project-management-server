@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      const API_URL = "http://localhost:8080/auth-service/v1/login";
+
+      const loginData = {
+        email: "anhtp.22it@vku.udn.vn",
+        password: "1234567",
+        deviceInfo: "CORS Test Script",
+      };
+
+      console.log("Đang gửi request tới:", API_URL);
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginData),
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error(
+            "Lỗi HTTP: " + response.status + " " + response.statusText
+          );
+        })
+        .then((data) => {
+          console.log("--- THÀNH CÔNG (ĐÃ VƯỢT QUA CORS) ---");
+          console.log("Đã nhận được dữ liệu:", data);
+        })
+        .catch((error) => {
+          console.error("--- ĐÃ XẢY RA LỖI ---");
+          console.error(error);
+
+          if (error.message.includes("Failed to fetch")) {
+            console.warn(
+              'GỢI Ý: Lỗi "Failed to fetch" hoặc "TypeError" gần như CHẮC CHẮN là lỗi CORS. ' +
+                'Hãy kiểm tra tab "Network" trong Dev Tools, bạn sẽ thấy request bị chặn bởi "CORS policy".'
+            );
+          }
+        });
+    </script>
+  </body>
+</html>
