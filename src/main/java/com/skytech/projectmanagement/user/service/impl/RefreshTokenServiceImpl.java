@@ -1,15 +1,19 @@
-package com.skytech.projectmanagement.user.service;
+package com.skytech.projectmanagement.user.service.impl;
 
 import java.time.Instant;
 import com.skytech.projectmanagement.common.exception.InvalidTokenException;
 import com.skytech.projectmanagement.user.entity.UserRefreshToken;
 import com.skytech.projectmanagement.user.repository.UserRefreshTokenRepository;
+import com.skytech.projectmanagement.user.service.RefreshTokenService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final UserRefreshTokenRepository tokenRepository;
@@ -54,4 +58,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return tokenEntity;
     }
 
+    @Scheduled(cron = "0 0 3 * * ?")
+    @Transactional
+    public void purgeExpiredRefreshTokens() {
+        Instant now = Instant.now();
+        log.info("CRON JOB: Bắt đầu dọn dẹp refresh token hết hạn trước {}", now);
+
+        long deletedCount = tokenRepository.deleteByExpiresAtBefore(now);
+
+        log.info("CRON JOB: Đã dọn dẹp xong. Xóa {} token.", deletedCount);
+    }
 }

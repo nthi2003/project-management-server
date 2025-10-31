@@ -6,7 +6,7 @@ import com.skytech.projectmanagement.common.dto.PaginatedResponse;
 import com.skytech.projectmanagement.common.dto.Pagination;
 import com.skytech.projectmanagement.common.dto.SuccessResponse;
 import com.skytech.projectmanagement.teams.dto.TeamsDTO;
-import com.skytech.projectmanagement.teams.service.TeamsService;
+import com.skytech.projectmanagement.teams.service.TeamService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -29,17 +29,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TeamsController {
 
-    private final TeamsService teamsService;
+    private final TeamService teamsService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_PRODUCT_OWNER')")
     public ResponseEntity<PaginatedResponse<TeamsDTO>> getAllTeams(Pageable pageable) {
         Page<TeamsDTO> page = teamsService.getAllTeams(pageable);
-        Pagination pagination = new Pagination(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
-        return ResponseEntity.ok(
-                PaginatedResponse.of(page.getContent(), pagination, "Lấy danh sách team thành công.")
-        );
+        Pagination pagination = new Pagination(page.getNumber(), page.getSize(),
+                page.getTotalElements(), page.getTotalPages());
+        return ResponseEntity.ok(PaginatedResponse.of(page.getContent(), pagination,
+                "Lấy danh sách team thành công."));
     }
 
 

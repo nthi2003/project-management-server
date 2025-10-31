@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.user.service;
+package com.skytech.projectmanagement.user.service.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +22,7 @@ import com.skytech.projectmanagement.user.dto.UserResponse;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.UserRefreshTokenRepository;
 import com.skytech.projectmanagement.user.repository.UserRepository;
+import com.skytech.projectmanagement.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.project.service;
+package com.skytech.projectmanagement.project.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ import com.skytech.projectmanagement.project.entity.ProjectMemberId;
 import com.skytech.projectmanagement.project.entity.ProjectRole;
 import com.skytech.projectmanagement.project.repository.ProjectMemberRepository;
 import com.skytech.projectmanagement.project.repository.ProjectRepository;
+import com.skytech.projectmanagement.project.service.ProjectService;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.service.UserService;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.teams.service;
+package com.skytech.projectmanagement.teams.service.impl;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +10,8 @@ import com.skytech.projectmanagement.teams.dto.TeamsDTO;
 import com.skytech.projectmanagement.teams.entity.TeamMember;
 import com.skytech.projectmanagement.teams.mapper.TeamMemberMapper;
 import com.skytech.projectmanagement.teams.repository.TeamMemberRepository;
+import com.skytech.projectmanagement.teams.service.TeamMemberService;
+import com.skytech.projectmanagement.teams.service.TeamService;
 import com.skytech.projectmanagement.user.dto.UserResponse;
 import com.skytech.projectmanagement.user.service.UserService;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class TeamMemberServiceImpl implements TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
-    private final TeamsService teamService;
+    private final TeamService teamService;
     private final UserService userService;
     private final TeamMemberMapper mapper;
 

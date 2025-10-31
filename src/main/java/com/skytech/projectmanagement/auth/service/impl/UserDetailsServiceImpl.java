@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.auth.service;
+package com.skytech.projectmanagement.auth.service.impl;
 
 import java.util.List;
 import java.util.Set;

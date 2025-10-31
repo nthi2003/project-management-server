@@ -1,5 +1,7 @@
-package com.skytech.projectmanagement.tasks.service;
+package com.skytech.projectmanagement.tasks.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
 import com.skytech.projectmanagement.project.entity.Project;
 import com.skytech.projectmanagement.project.repository.ProjectRepository;
@@ -9,17 +11,15 @@ import com.skytech.projectmanagement.tasks.dto.UpdateTaskRequestDTO;
 import com.skytech.projectmanagement.tasks.entity.Tasks;
 import com.skytech.projectmanagement.tasks.mapper.TaskMapper;
 import com.skytech.projectmanagement.tasks.repository.TaskRepository;
+import com.skytech.projectmanagement.tasks.service.TaskService;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.UserRepository;
-import jakarta.persistence.criteria.Join;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -32,19 +32,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponseDTO getTaskById(Integer taskId) {
-        Tasks task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
+        Tasks task = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
 
         return taskMapper.toDto(task);
     }
 
     @Override
     public TaskResponseDTO createTask(CreateTaskRequestDTO requestDTO, Authentication auth) {
-        User currentUser = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng hiện tại"));
+        User currentUser = userRepository.findByEmail(auth.getName()).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy người dùng hiện tại"));
 
         Project project = projectRepository.findById(requestDTO.getProjectId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy project với ID: " + requestDTO.getProjectId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy project với ID: " + requestDTO.getProjectId()));
 
         Tasks task = taskMapper.toEntity(requestDTO);
         task.setCreator(currentUser);
@@ -62,8 +63,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponseDTO updateTask(Integer taskId, UpdateTaskRequestDTO requestDTO) {
-        Tasks existingTask = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
+        Tasks existingTask = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
 
         taskMapper.updateEntityFromDTO(requestDTO, existingTask);
         Tasks updated = taskRepository.save(existingTask);
@@ -73,23 +74,21 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteTask(Integer taskId) {
-        Tasks existingTask = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
+        Tasks existingTask = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
         taskRepository.delete(existingTask);
     }
 
     @Override
-    public List<TaskResponseDTO> getTasks(Integer projectId, Integer assigneeId, String status, String priority) {
+    public List<TaskResponseDTO> getTasks(Integer projectId, Integer assigneeId, String status,
+            String priority) {
         var spec = filter(projectId != null ? projectId.intValue() : null,
-                                            assigneeId != null ? assigneeId.intValue() : null,
-                status, priority);
-        return taskRepository.findAll(spec)
-                .stream()
-                .map(taskMapper::toDto)
-                .toList();
+                assigneeId != null ? assigneeId.intValue() : null, status, priority);
+        return taskRepository.findAll(spec).stream().map(taskMapper::toDto).toList();
     }
 
-    private Specification<Tasks> filter(Integer projectId, Integer assigneeId, String status, String priority){
+    private Specification<Tasks> filter(Integer projectId, Integer assigneeId, String status,
+            String priority) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package com.skytech.projectmanagement.user.repository;
 
+import java.time.Instant;
 import java.util.Optional;
 import com.skytech.projectmanagement.user.entity.UserRefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,6 @@ public interface UserRefreshTokenRepository extends JpaRepository<UserRefreshTok
     void deleteByRefreshToken(String refreshToken);
 
     void deleteByUserId(Integer userId);
+
+    long deleteByExpiresAtBefore(Instant now);
 }
