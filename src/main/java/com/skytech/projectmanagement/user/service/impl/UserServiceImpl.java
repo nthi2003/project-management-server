@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.user.service;
+package com.skytech.projectmanagement.user.service.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.skytech.projectmanagement.common.exception.FileStorageException;
 import com.skytech.projectmanagement.common.exception.InvalidOldPasswordException;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
 import com.skytech.projectmanagement.common.exception.UserNotFoundInRequestException;
-import com.skytech.projectmanagement.filestorage.config.MinioConfig;
+import com.skytech.projectmanagement.filestorage.config.CloudinaryConfig;
 import com.skytech.projectmanagement.filestorage.service.FileStorageService;
 import com.skytech.projectmanagement.user.dto.ChangePasswordRequest;
 import com.skytech.projectmanagement.user.dto.CreateUserRequest;
@@ -22,6 +22,7 @@ import com.skytech.projectmanagement.user.dto.UserResponse;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.UserRefreshTokenRepository;
 import com.skytech.projectmanagement.user.repository.UserRepository;
+import com.skytech.projectmanagement.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
-    private final MinioConfig minioConfig;
+    private final CloudinaryConfig cloudinaryConfig;
 
     @Override
     public User findUserByEmail(String email) {
@@ -96,7 +97,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserProfile(String email) {
         User user = findUserByEmail(email);
 
-        return UserResponse.fromEntity(user);
+        return createResponseWithAvatarUrl(user);
     }
 
     @Override
@@ -116,7 +117,8 @@ public class UserServiceImpl implements UserService {
 
         Page<User> userPage = userRepository.findAll(spec, pageable);
 
-        List<UserResponse> userDtoList = userPage.stream().map(UserResponse::fromEntity).toList();
+        List<UserResponse> userDtoList =
+                userPage.stream().map(this::createResponseWithAvatarUrl).toList();
 
         Pagination pagination = new Pagination(userPage.getNumber(), userPage.getSize(),
                 userPage.getTotalElements(), userPage.getTotalPages());
@@ -148,7 +150,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
 
-        return UserResponse.fromEntity(user);
+        return createResponseWithAvatarUrl(user);
     }
 
     @Override
@@ -162,7 +164,7 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = userRepository.save(userToUpdate);
 
-        return UserResponse.fromEntity(updatedUser);
+        return createResponseWithAvatarUrl(updatedUser);
     }
 
     @Override
@@ -174,17 +176,13 @@ public class UserServiceImpl implements UserService {
 
         User userToDelete = userRepository.findById(userId).get();
 
-        String oldAvatarUrl = userToDelete.getAvatar();
-        if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
+        String oldObjectName = userToDelete.getAvatar();
+        if (oldObjectName != null && !oldObjectName.isBlank()) {
             try {
-                String oldObjectName = extractObjectNameFromUrl(oldAvatarUrl,
-                        minioConfig.getEndpoint(), minioConfig.getBucketName());
-                if (oldObjectName != null) {
-                    log.info("Attempting to delete old avatar: {}", oldObjectName);
-                    fileStorageService.deleteFile(oldObjectName);
-                }
+                log.info("Attempting to delete old avatar: {}", oldObjectName);
+                fileStorageService.deleteFile(oldObjectName);
             } catch (Exception e) {
-                log.error("Could not delete old avatar '{}': {}", oldAvatarUrl, e.getMessage());
+                log.error("Could not delete old avatar '{}': {}", oldObjectName, e.getMessage());
             }
         }
 
@@ -204,27 +202,22 @@ public class UserServiceImpl implements UserService {
 
         User currentUser = findUserByEmail(userEmail);
 
-        String oldAvatarUrl = currentUser.getAvatar();
-        if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
+        String oldObjectName = currentUser.getAvatar();
+        if (oldObjectName != null && !oldObjectName.isBlank()) {
             try {
-                String oldObjectName = extractObjectNameFromUrl(oldAvatarUrl,
-                        minioConfig.getEndpoint(), minioConfig.getBucketName());
-                if (oldObjectName != null) {
-                    log.info("Attempting to delete old avatar: {}", oldObjectName);
-                    fileStorageService.deleteFile(oldObjectName);
-                }
+                log.info("Attempting to delete old avatar: {}", oldObjectName);
+                fileStorageService.deleteFile(oldObjectName);
             } catch (Exception e) {
-                log.error("Could not delete old avatar '{}': {}", oldAvatarUrl, e.getMessage());
+                log.error("Could not delete old avatar '{}': {}", oldObjectName, e.getMessage());
             }
         }
 
         String objectName = fileStorageService.uploadFile(file, "avatars/");
-        String avatarUrl = fileStorageService.getFileUrl(objectName);
 
-        currentUser.setAvatar(avatarUrl);
+        currentUser.setAvatar(objectName);
         User updatedUser = userRepository.save(currentUser);
 
-        return UserResponse.fromEntity(updatedUser);
+        return createResponseWithAvatarUrl(updatedUser);
     }
 
     private void validateAvatarFile(MultipartFile file) {
@@ -235,20 +228,6 @@ public class UserServiceImpl implements UserService {
         if (contentType == null || (!contentType.startsWith("image/jpeg")
                 && !contentType.startsWith("image/png"))) {
             throw new FileStorageException("Chỉ chấp nhận file ảnh JPG hoặc PNG.");
-        }
-    }
-
-    private String extractObjectNameFromUrl(String fileUrl, String endpoint, String bucketName) {
-        if (fileUrl == null || endpoint == null || bucketName == null)
-            return null;
-
-        String prefixToRemove = endpoint + "/" + bucketName + "/";
-
-        if (fileUrl.startsWith(prefixToRemove)) {
-            return fileUrl.substring(prefixToRemove.length());
-        } else {
-            log.warn("Could not extract object name from URL: {}", fileUrl);
-            return null;
         }
     }
 
@@ -282,4 +261,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(userId);
     }
 
+    private UserResponse createResponseWithAvatarUrl(User user) {
+        String objectName = user.getAvatar();
+        String finalAvatarUrl = null;
+
+        if (objectName != null && !objectName.isBlank()) {
+            finalAvatarUrl = fileStorageService.getFileUrl(objectName);
+        }
+
+        return new UserResponse(user.getId(), user.getFullName(), user.getEmail(), finalAvatarUrl,
+                user.getCreatedAt());
+    }
 }

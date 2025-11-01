@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.teams.service;
+package com.skytech.projectmanagement.teams.service.impl;
 
 import java.util.UUID;
 import com.skytech.projectmanagement.common.exception.FileStorageException;
@@ -9,6 +9,7 @@ import com.skytech.projectmanagement.teams.entity.Teams;
 import com.skytech.projectmanagement.teams.mapper.TeamMapper;
 import com.skytech.projectmanagement.teams.repository.TeamMemberRepository;
 import com.skytech.projectmanagement.teams.repository.TeamsRepository;
+import com.skytech.projectmanagement.teams.service.TeamService;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TeamServiceImpl implements TeamsService {
+public class TeamServiceImpl implements TeamService {
 
     private final TeamsRepository teamsRepository;
     private final TeamMapper teamMapper;

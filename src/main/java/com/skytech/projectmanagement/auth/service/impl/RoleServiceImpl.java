@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.auth.service;
+package com.skytech.projectmanagement.auth.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +17,7 @@ import com.skytech.projectmanagement.auth.repository.PermissionRepository;
 import com.skytech.projectmanagement.auth.repository.RolePermissionRepository;
 import com.skytech.projectmanagement.auth.repository.RoleRepository;
 import com.skytech.projectmanagement.auth.repository.UserRoleRepository;
+import com.skytech.projectmanagement.auth.service.RoleService;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
 import com.skytech.projectmanagement.common.exception.RoleNameExistsException;
 import com.skytech.projectmanagement.common.exception.ValidationException;

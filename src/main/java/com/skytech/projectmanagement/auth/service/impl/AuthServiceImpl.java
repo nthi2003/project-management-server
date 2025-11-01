@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.auth.service;
+package com.skytech.projectmanagement.auth.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +9,7 @@ import com.skytech.projectmanagement.auth.dto.RefreshTokenResponse;
 import com.skytech.projectmanagement.auth.dto.ResetPasswordRequest;
 import com.skytech.projectmanagement.auth.dto.UserLoginResponse;
 import com.skytech.projectmanagement.auth.security.JwtTokenProvider;
+import com.skytech.projectmanagement.auth.service.AuthService;
 import com.skytech.projectmanagement.common.mail.EmailService;
 import com.skytech.projectmanagement.user.entity.PasswordResetToken;
 import com.skytech.projectmanagement.user.entity.User;

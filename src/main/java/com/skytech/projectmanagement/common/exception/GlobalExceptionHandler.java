@@ -11,9 +11,35 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleFileSizeLimitExceeded(
+            MaxUploadSizeExceededException ex) {
+        ErrorDetails details = new ErrorDetails("FILE_SIZE_LIMIT_EXCEEDED",
+                "Tệp tải lên vượt quá giới hạn cho phép (ví dụ: 10MB).", ex.getMessage());
+        return new ResponseEntity<>(ErrorResponse.of("File quá lớn.", details),
+                HttpStatus.PAYLOAD_TOO_LARGE); // 413
+    }
+
+    @ExceptionHandler(FileValidationException.class)
+    public ResponseEntity<ErrorResponse> handleFileValidation(FileValidationException ex) {
+        ErrorDetails details = new ErrorDetails("FILE_VALIDATION_ERROR", // 400
+                ex.getMessage(), null);
+        return new ResponseEntity<>(ErrorResponse.of("File không hợp lệ.", details),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTeamNotFound(TeamNotFoundException ex) {
+        ErrorDetails details = new ErrorDetails("TEAM_NOT_FOUND", // 404
+                ex.getMessage(), null);
+        ErrorResponse errorResponse = ErrorResponse.of("Không tìm thấy team.", details);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND); // 404
+    }
 
     @ExceptionHandler(RoleNameExistsException.class)
     public ResponseEntity<ErrorResponse> handleRoleNameExists(RoleNameExistsException ex) {

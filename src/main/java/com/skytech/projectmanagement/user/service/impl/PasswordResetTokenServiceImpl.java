@@ -1,4 +1,4 @@
-package com.skytech.projectmanagement.user.service;
+package com.skytech.projectmanagement.user.service.impl;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -7,6 +7,7 @@ import com.skytech.projectmanagement.common.exception.InvalidResetTokenException
 import com.skytech.projectmanagement.user.entity.PasswordResetToken;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.repository.PasswordResetTokenRepository;
+import com.skytech.projectmanagement.user.service.PasswordResetTokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;

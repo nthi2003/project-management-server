@@ -1,24 +1,23 @@
-package com.skytech.projectmanagement.tasks.service;
+package com.skytech.projectmanagement.tasks.service.impl;
 
+import java.util.List;
 import com.skytech.projectmanagement.common.exception.DeleteConflictException;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
-import com.skytech.projectmanagement.tasks.dto.TaskAssigneeRequestDTO;
 import com.skytech.projectmanagement.tasks.dto.TaskAssigneeResponseDTO;
 import com.skytech.projectmanagement.tasks.entity.TaskAssignee;
 import com.skytech.projectmanagement.tasks.mapper.TaskAssigneeMapper;
 import com.skytech.projectmanagement.tasks.repository.TaskAssigneeRepository;
+import com.skytech.projectmanagement.tasks.service.TaskAssigneeService;
+import com.skytech.projectmanagement.tasks.service.TaskService;
 import com.skytech.projectmanagement.user.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TaskAssigneeServiceImpl implements TaskAssigneeService{
+public class TaskAssigneeServiceImpl implements TaskAssigneeService {
     private final TaskAssigneeRepository taskAssigneeRepository;
     private final UserService userService;
     private final TaskService taskService;
@@ -31,7 +30,7 @@ public class TaskAssigneeServiceImpl implements TaskAssigneeService{
         taskService.getTaskById(taskId);
 
         boolean exists = taskAssigneeRepository.existsByTaskIdAndUserId(taskId, userId);
-        if(exists){
+        if (exists) {
             throw new DeleteConflictException("User này đã được gán cho task rồi");
         }
 

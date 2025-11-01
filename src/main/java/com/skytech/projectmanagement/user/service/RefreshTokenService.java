@@ -9,4 +9,6 @@ public interface RefreshTokenService {
     void deleteRefreshToken(String token);
 
     UserRefreshToken verifyAndRotateRefreshToken(String oldToken);
+
+    void purgeExpiredRefreshTokens();
 }

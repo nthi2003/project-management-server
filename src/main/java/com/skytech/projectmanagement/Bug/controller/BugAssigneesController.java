@@ -20,6 +20,7 @@ public class BugAssigneesController {
     private final BugAssigneesService bugAssigneesService;
 
     @PostMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<BugAssigneesDTO>> assignUserToBug(
             @PathVariable UUID bugId,
             @PathVariable Integer userId) {
@@ -29,6 +30,7 @@ public class BugAssigneesController {
     }
 
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<Void>> unassignUserFromBug(
             @PathVariable UUID bugId,
             @PathVariable Integer userId) {
@@ -38,6 +40,7 @@ public class BugAssigneesController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<List<BugAssigneesDTO>>> getAssigneesByBug(
             @PathVariable UUID bugId) {
 

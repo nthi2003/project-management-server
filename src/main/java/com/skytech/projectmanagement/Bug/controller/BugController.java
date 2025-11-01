@@ -20,6 +20,7 @@ public class BugController {
     private final BugService bugService;
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<BugResponseDTO>> createBug(
             @Valid @RequestBody BugRequestDTO dto) {  // ← thêm @Valid
         System.out.println("=== DEBUG DTO ===");
@@ -39,17 +40,20 @@ public class BugController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<Void>> deleteBug(@PathVariable UUID id) {
         bugService.deleteBug(id);
         return ResponseEntity.ok(SuccessResponse.of(null, "Xoá bug thành công."));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<BugResponseDTO>> getBugById(@PathVariable UUID id) {
         BugResponseDTO bug = bugService.getBugById(id);
         return ResponseEntity.ok(SuccessResponse.of(bug, "Lấy thông tin bug thành công."));
     }
     @GetMapping("/by-project/{projectId}")
+    @PreAuthorize("hasAnyAuthority('PROJECT_MANAGE_ANY', 'PROJECT_MEMBER_MANAGE')")
     public ResponseEntity<SuccessResponse<List<BugResponseDTO>>> getBugsByProjectId(
             @PathVariable Integer projectId) {
 

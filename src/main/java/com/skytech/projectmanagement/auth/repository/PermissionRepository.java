@@ -1,6 +1,7 @@
 package com.skytech.projectmanagement.auth.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import com.skytech.projectmanagement.auth.entity.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PermissionRepository extends JpaRepository<Permission, Integer> {
+
+    Optional<Permission> findByName(String name);
 
     @Query("SELECT p.name FROM Permission p")
     Set<String> findAllPermissionNames();
