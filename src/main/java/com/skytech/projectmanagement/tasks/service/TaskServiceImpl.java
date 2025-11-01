@@ -89,6 +89,12 @@ public class TaskServiceImpl implements TaskService {
                 .toList();
     }
 
+    @Override
+    public Tasks getTaskEntityById(Integer taskId) {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy task với ID: " + taskId));
+    }
+
     private Specification<Tasks> filter(Integer projectId, Integer assigneeId, String status, String priority){
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -110,4 +116,5 @@ public class TaskServiceImpl implements TaskService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
 }

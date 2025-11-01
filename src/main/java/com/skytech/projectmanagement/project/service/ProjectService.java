@@ -9,6 +9,7 @@ import com.skytech.projectmanagement.project.dto.ProjectMemberResponse;
 import com.skytech.projectmanagement.project.dto.ProjectSummaryResponse;
 import com.skytech.projectmanagement.project.dto.UpdateMemberRoleRequest;
 import com.skytech.projectmanagement.project.dto.UpdateProjectRequest;
+import com.skytech.projectmanagement.project.entity.Project;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
@@ -36,4 +37,5 @@ public interface ProjectService {
             Authentication authentication);
 
     List<ProjectMemberResponse> getProjectMembers(Integer projectId, Authentication authentication);
+    Project getProjectEntityById(Integer projectId);
 }

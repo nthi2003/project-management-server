@@ -383,5 +383,9 @@ public class ProjectServiceImpl implements ProjectService {
             return root.get("id").in(projectIds);
         };
     }
+    public Project getProjectEntityById(Integer projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy project với ID: " + projectId));
+    }
 
 }
