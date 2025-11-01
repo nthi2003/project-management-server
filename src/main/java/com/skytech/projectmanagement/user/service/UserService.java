@@ -40,4 +40,6 @@ public interface UserService {
     void updatePassword(Integer userId, String newPassword);
 
     void changePassword(String userEmail, ChangePasswordRequest request);
+    User getUserEntityById(Integer userId);
+
 }
