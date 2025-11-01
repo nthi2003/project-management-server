@@ -15,6 +15,7 @@ import com.skytech.projectmanagement.common.exception.ProjectKeyExistsException;
 import com.skytech.projectmanagement.common.exception.ResourceNotFoundException;
 import com.skytech.projectmanagement.project.dto.AddMemberRequest;
 import com.skytech.projectmanagement.project.dto.CreateProjectRequest;
+import com.skytech.projectmanagement.project.dto.ImportTeamRequest;
 import com.skytech.projectmanagement.project.dto.ProjectDetailsResponse;
 import com.skytech.projectmanagement.project.dto.ProjectMemberResponse;
 import com.skytech.projectmanagement.project.dto.ProjectSummaryResponse;
@@ -27,6 +28,7 @@ import com.skytech.projectmanagement.project.entity.ProjectRole;
 import com.skytech.projectmanagement.project.repository.ProjectMemberRepository;
 import com.skytech.projectmanagement.project.repository.ProjectRepository;
 import com.skytech.projectmanagement.project.service.ProjectService;
+import com.skytech.projectmanagement.teams.service.TeamService;
 import com.skytech.projectmanagement.user.entity.User;
 import com.skytech.projectmanagement.user.service.UserService;
 import org.springframework.data.domain.Page;
@@ -48,6 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserService userService;
+    private final TeamService teamService;
 
     @Override
     public PaginatedResponse<ProjectSummaryResponse> getProjects(Pageable pageable, String search,
@@ -383,6 +386,29 @@ public class ProjectServiceImpl implements ProjectService {
 
             return root.get("id").in(projectIds);
         };
+    }
+
+    @Override
+    @Transactional
+    public List<ProjectMemberResponse> importTeamMembers(Integer projectId,
+            ImportTeamRequest request, Authentication auth) {
+
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy dự án với ID: " + projectId));
+        User currentUser = userService.findUserByEmail(auth.getName());
+        checkAdminOrCreatorPermission(project, currentUser, auth);
+
+        // List<Integer> userIdsFromTeam = teamService.getMemberUserIds(request.teamId());
+
+        // 3. Lấy danh sách thành viên đã có trong dự án
+        // 4. Lọc ra những user ID MỚI
+        // Nếu không có ai mới -> trả về rỗng
+        // 5. KIỂM TRA USER TỒN TẠI (400) - (Rule 1.1 - Gọi UserService)
+        // 6. Tạo và LƯU các thành viên mới
+        // 7. LẤY THÔNG TIN ĐẦY ĐỦ (Rule 1.1 - Gọi UserService)
+        // 8. TẠO RESPONSE DTO (Rule 4.2)
+
+        throw new UnsupportedOperationException("Unimplemented method 'importTeamMembers'");
     }
 
 }

@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface UserRepository
         extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
 
+    List<User> findByIsAdmin(Boolean isAdmin);
+
     Optional<User> findByEmail(String email);
 
     List<User> findByIdIn(Collection<Integer> userIds);

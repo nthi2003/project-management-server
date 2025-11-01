@@ -4,6 +4,7 @@ import java.util.List;
 import com.skytech.projectmanagement.common.dto.PaginatedResponse;
 import com.skytech.projectmanagement.project.dto.AddMemberRequest;
 import com.skytech.projectmanagement.project.dto.CreateProjectRequest;
+import com.skytech.projectmanagement.project.dto.ImportTeamRequest;
 import com.skytech.projectmanagement.project.dto.ProjectDetailsResponse;
 import com.skytech.projectmanagement.project.dto.ProjectMemberResponse;
 import com.skytech.projectmanagement.project.dto.ProjectSummaryResponse;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 public interface ProjectService {
+
+    List<ProjectMemberResponse> importTeamMembers(Integer projectId, ImportTeamRequest request,
+            Authentication auth);
 
     void removeProjectMember(Integer projectId, Integer userId, Authentication auth);
 
